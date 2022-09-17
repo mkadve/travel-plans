@@ -2,7 +2,7 @@
 <div class="travel-info">
 <div class="travel-search">
     <div class="search-wrapper" [class.result-show]="citySearch && cityLists && cityLists.length">
-        <input class="form-control" type="text" placeholder="Search City" (keyup)="onKeySearch($event)">
+        <input class="form-control" type="text" placeholder="Search City" (keyup)="onKeySearch($event)" [value]="cityName">
             <ul class="result-option">
                 <li *ngFor="let city of cityLists" (click)="cityClick(city)"> <a href="">{{city.name}}</a> </li>
             </ul>

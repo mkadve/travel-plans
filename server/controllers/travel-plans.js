@@ -1,10 +1,52 @@
 var fs = require('fs');
+var kdTree = require("static-kdtree");
 var filePath = './cities.json';
 var allCitiesData;
 var continentCoordinates = new Array();
 exports.getCityNames = (req, res, next) => {
   res.status(200).json({
     cities: getCityArray(req.params.id)
+  });
+};
+
+exports.createPlans = (req, res, next) => {
+  const body = req.body;
+  this.allCitiesData = JSON.parse(fs.readFileSync(filePath));
+  //starting city which is visited removed the continent not needed for computation
+  let sourceCity = body;
+  
+  let finalpath = `${sourceCity.id} (${sourceCity.name}, ${sourceCity.contId})`;
+  
+  let continentPath = findShortestPathContinents(body, this.allCitiesData);
+  let removedCity = removeContinentFromCityId(this.allCitiesData,body.id);
+
+
+  let totalDistanceTravelled = 0;
+		let prevLatX = sourceCity.lat;
+		let prevLatY = sourceCity.lon;
+
+    finalpath += `${shortestDistanceCity.id} (${shortestDistanceCity.name}, ${shortestDistanceCity.contId})`;
+    
+    for (const [key, value] of continentPath) {
+      console.log('continentPath',continentPath)
+      finalPath += " --> ";
+      let shortestDistanceCity = findShortestCityInContinentFromCoordinate(sourceCity,value.contId);
+      finalpath = `${shortestDistanceCity.id} (${shortestDistanceCity.name}, ${shortestDistanceCity.contId})`;
+
+      let coordinatesValue = shortestDistanceCity.x;
+      totalDistanceTravelled +=getDistanceFromLatLonInKm(prevLatX,prevLatY,coordinatesValue[0],coordinatesValue[y]);
+      prevLatX = coordinatesValue[0];
+      prevLatY = coordinatesValue[1];
+
+      finalpath = ` --> Back To ${sourceCity.id} (${sourceCity.name}, ${sourceCity.contId})`;
+      totalDistanceTravelled += getDistanceFromLatLonInKm(prevLatX,prevLatY,sourceCity.location.id,sourceCity.location.lon);
+      break;
+    }
+    
+
+  res.status(201).json({
+    message: 'Post created successfully!',
+    data: { distanceTravelled: totalDistanceTravelled, path: finalpath }
   });
 };
 
@@ -16,7 +58,9 @@ function getCityArray(search) {
       let cityObj = {}
       cityObj['id'] = key;
       cityObj['name'] = value.name;
-      cityObj['location'] = value.location;
+      cityObj['contId'] = value.contId;
+      cityObj['lat'] = value.location.lat;
+      cityObj['lon'] = value.location.lon;
       cityList.push(cityObj);
     }
     var condition = new RegExp(search);
@@ -62,7 +106,6 @@ function groupCityByContinent(allCitiesData) {
     continentList.push('oceania');
     for (const continentName of continentList) {
       continentGroupedCity[continentName] = readByContinentId(allCitiesData, continentName)
-      // continentGroupedCity.push(continentName, readByContinentId(allCitiesData, continentName));
     }
     return continentGroupedCity;
 }
@@ -75,7 +118,6 @@ function readByContinentId(allCitiesData, continentId) {
   let continentAverageY = 0;
   let cityCount = 0;
   for (const cityCode of allCityCode) {
-    // let city = allCitiesData.getJSONObject(cityCode.toString());
     let city = allCitiesData[cityCode];
     if (city['contId'] == continentId) {
       let customCityData = new Object();
@@ -95,7 +137,6 @@ function readByContinentId(allCitiesData, continentId) {
     lat: continentAverageX / cityCount,
     lon: continentAverageY / cityCount
   }
-  // continentCoordinates.push(continentId, new Object().push('lat', continentAverageX / cityCount).push('lon', continentAverageY / cityCount));
   continentCoordinates.push(obj);
   return continentCity;
 }
@@ -104,26 +145,76 @@ function removeContinentFromCityId(allCitiesData, cityId) {
   let allContinentCode = Object.keys(allCitiesData);
   for (const contCode of allContinentCode) {
     let continentStartingPoint = false;
-    let continentCity = Object.entries(allCitiesData).contCode;
-    for (let i = 0; i < continentCity.length(); i++) {
-      if (continentCity[i]['id'] == cityId) {
-        this.startingCity = continentCity[i];
+    let continentCity = Object.entries(allCitiesData);
+    for (const [key, value] of continentCity) {
+      
+      if (value['id'] == cityId) {
+        this.startingCity = continentCity[key];
         continentStartingPoint = true;
         break;
       }
+      if (continentStartingPoint) {
+        allCitiesData.pop(contCode);
+        break;
+      }
     }
-    if (continentStartingPoint) {
-      allCitiesData.pop(contCode);
-      break;
-    }
+    
   }
   return allCitiesData;
 }
-exports.createPost = (req, res, next) => {
-  const body = req.body;
-  // Create post in db
-  res.status(201).json({
-    message: 'Post created successfully!',
-    post: { id: new Date().toISOString(), body }
-  });
-};
+
+function findShortestCityInContinentFromCoordinate(sourceCity,citiesList) {
+    let cityList = Object.entries(citiesList);
+		let numPoint = cityList.length;
+    var tree = new kdTree(numPoint);
+     for (let i = 0; i < numPoint ; i++) {
+      let city = cityList[i];
+      let coordinates = [];
+      coordinates[0] = city.location.lat;
+      coordinates[1] = city.location.lon;
+      tree.add(coordinates,city.contId,city.id,city.name);
+      let kdn = tree.nn(coordinates);
+      return kdn;
+    }
+}
+
+
+function  findShortestPathContinents(sourceContId ,readData) {
+  let tempContinentCoord = Object.entries(readData);
+  // console.log('called ---->',tempContinentCoord)
+  let contiShortestPath = new Array();
+  let shortestDistance = Number.MAX_VALUE;
+  let prevLat = sourceContId.lat;
+  let prevLon = sourceContId.lon;
+
+  let index = tempContinentCoord.findIndex((val)=> val.id == sourceContId);
+  if(index > -1) {
+    tempContinentCoord.slice(index,1);
+  }
+  let nearbyContId = sourceContId.id;
+
+  
+  while(tempContinentCoord.length > 0) {
+    for(const [key, value] of tempContinentCoord) {
+     let contId = value.id;
+     let location = value.location;
+    let distanceFromSource = getDistanceFromLatLonInKm(prevLat,prevLon,location.lat,location.lon);
+      if (distanceFromSource < shortestDistance) {
+        shortestDistance = distanceFromSource;
+        nearbyContId = sourceContId;
+      }
+    }
+    
+    contiShortestPath.push(nearbyContId);
+    prevLat = nearbyContId['lat'];
+    prevLon = nearbyContId['lon'];
+
+    const contIndex = tempContinentCoord.findIndex((val)=> val.id === nearbyContId);
+    if (contIndex > -1 ) {
+      tempContinentCoord.slice(contIndex,1);
+    }
+    shortestDistance = Number.MAX_VALUE;
+  }
+  return contiShortestPath;
+}
+

@@ -9,6 +9,6 @@ router.get('/search/:id', feedController.getCityNames);
 
 
 // POST /feed/post
-router.post('/plans', feedController.createPost);
+router.post('/plans', feedController.createPlans);
 
 module.exports = router;

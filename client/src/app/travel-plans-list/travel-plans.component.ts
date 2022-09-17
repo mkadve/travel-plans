@@ -18,8 +18,9 @@ export class TravelPlansComponent implements OnInit {
   travelPlans$: Observable<any[]> = new Observable();
   travelPlansByCity$: Observable<any[]> = new Observable();
   timeout: any = null;
-  cityLists: any = [];
+  cityLists: any = [];  
   citySearch: string = '';
+  travelData: any;
 
   constructor(private travelPlansService: TravelPlansService) { }
 
@@ -38,6 +39,7 @@ export class TravelPlansComponent implements OnInit {
     this.travelPlansByCity$ = this.travelPlansService.getPlanByCity(city);
     this.travelPlansByCity$.subscribe((res : any)=>{
       console.log(res);
+      this.travelData = res.data;
     })
   }
 
@@ -56,7 +58,7 @@ export class TravelPlansComponent implements OnInit {
     this.travelPlans$ = this.travelPlansService.getPlanById(value);
     this.travelPlans$.subscribe((res : any)=>{
       this.cityLists = res['cities'];
-      console.log('this.cityLists',this.cityLists,res,res.cities)
+      
     })
   }
 }

@@ -7,10 +7,10 @@
                 <li *ngFor="let city of cityLists" (click)="cityClick(city)"> <a href="">{{city.name}}</a> </li>
             </ul>
     </div>
-    <span>Distance Travelled:0 Km</span>
+    <span>Distance Travelled:{{travelData?.distanceTravelled}} Km</span>
 </div>
 <div class="desc">
-    BOM (Bombay, Asia) → PAR (Paris, Europe) → CAI (Cairo, Africa)→ NYC (New York, North America) → BOG (Bogota, South America) →SYD (Sydney, Oceania) → BOM (Back to Bombay)
+    {{travelData?.path}}
 </div>
 </div>
     <div id="map">

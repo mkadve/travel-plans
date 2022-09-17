@@ -3,8 +3,9 @@
 This is a simple CRUD application built using the MEAN (Express, Angular, Node.js) stack.
 
 ## How To Run
-Move to client directory and run ng serve. It will run on port 4200 <br />
-Move to server directory and run node app. It will run on port 8080 <br />
+Prerequiestes are Angular cli, NODE and NPM
+Move to client directory and run npm install and ng serve. It will run on port 4200 <br />
+Move to server directory and run npm install and node app. It will run on port 8080 <br />
 
 Now you can search by city and find plans according to it.<br />
 

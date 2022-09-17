@@ -9,4 +9,4 @@ Move to server directory and run node app. It will run on port 8080 <br />
 Now you can search by city and find plans according to it.<br />
 
 Following is the UI
-(![alt text](https://github.com/mkadve/travel-plans/blob/main/image.jpg?raw=true))
+(![alt text](https://github.com/mkadve/travel-plans/blob/main/image.png))

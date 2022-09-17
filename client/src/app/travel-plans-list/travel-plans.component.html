@@ -1,0 +1,23 @@
+<h2 class="text-center m-5">Travel Plan</h2>
+<div class="travel-info">
+<div class="travel-search">
+    <div class="search-wrapper" [class.result-show]="citySearch && cityLists && cityLists.length">
+        <input class="form-control" type="text" placeholder="Search City" (keyup)="onKeySearch($event)">
+            <ul class="result-option">
+                <li *ngFor="let city of cityLists" (click)="cityClick(city)"> <a href="">{{city.name}}</a> </li>
+            </ul>
+    </div>
+    <span>Distance Travelled:0 Km</span>
+</div>
+<div class="desc">
+    BOM (Bombay, Asia) → PAR (Paris, Europe) → CAI (Cairo, Africa)→ NYC (New York, North America) → BOG (Bogota, South America) →SYD (Sydney, Oceania) → BOM (Back to Bombay)
+</div>
+</div>
+    <div id="map">
+        <mgl-map
+        [style]="'mapbox://styles/mapbox/streets-v9'"
+        [zoom]="[1]"
+        [center]="[-74.5, 40]"
+      >
+      </mgl-map>
+    </div>
